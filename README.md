@@ -1,6 +1,5 @@
 # Game Night Bot
-## A Discord bot, written in Python3 to help manage game nights.
-## PRs welcome!
+## A Discord bot, written in Python3 to help manage game nights. PRs welcome!
 
 ### About:
 TODO
@@ -9,26 +8,9 @@ TODO
 * Roll die: Rolls a specified number of die with a specified number of sides. 
     * Usage: `!roll <number of die> <number of sides>`
     * Thanks to Alex Ronquillo from Real Python!
-        * https://realpython.com/how-to-make-a-discord-bot-python/! 
+        * https://realpython.com/how-to-make-a-discord-bot-python/
 
 ### Planned features/commands:
-* Keep track of a list of games, including:
-    * Free:
-        * CAH: https://pretendyoure.xyz/zy/
-        * Catan: https://hexs.io/ OR https://colonist.io/ 
-            * max 4; 5+ players is _currently_ $9/mo
-        * Codenames: https://codenames.plus/
-        * Krunker (online FPS): https://krunker.io
-        * Games from Steam, streamed via Discord Live
-            * Jackbox (Party Pack 3: Quiplash 2, Trivia Murder Party, Guesspionage, Tee K.O., Drawful 2)
-            * Keep Talking and Nobody Explodes (best w/2-3 people)
-    * Purchase req'd:
-        * Steam
-            * Golf with Friends
-            * Uno
-            * Civ V
-        * Minecraft
-            * Hypixel minigames: mc.hypixel.net
 * Polls
     * Admin role can create a poll
     * Admin role can add options to a poll

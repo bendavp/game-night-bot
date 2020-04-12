@@ -18,7 +18,9 @@ with open('../data/games_links.json') as f:
 with open('../data/games_help.json') as f:
     GAMES_HELP = json.load(f)
 
-load_dotenv()
+from pathlib import Path
+env_path = Path('.') / '../data/.env'
+load_dotenv(dotenv_path=env_path)
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
@@ -29,11 +31,13 @@ async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
 
 @bot.command(name='game', help="Gets a list of Games for Game Night")
+@commands.has_role('admin')
 async def game(ctx, game, info):
-    if game is "help":
-        res = ("Usage: `!game <name_of_the_game> <info/link>`\n" + 
-        "For example, try: `!game cah info` or `!game keep_talking link`\n\n" +
-        "Available games:\n\t" + "\n\t{}".join(GAMES_NAMES.items()))    
+    res = "test"
+    # if game == "help":
+    #     res += ("Usage: `!game <name_of_the_game> <info/link>`\n" + 
+    #     "For example, try: `!game cah info` or `!game keep_talking link`\n\n" +
+    #     "Available games:\n\t" + "\n\t{}".join(GAMES_NAMES.items()))    
     await ctx.send(res)
 
 @bot.command(name='roll', help='Simulates rolling dice.')
@@ -42,25 +46,36 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
         str(random.choice(range(1, number_of_sides + 1)))
         for _ in range(number_of_dice)
     ]
-    await ctx.send(', '.join(dice))
+    res='[' + '] ['.join(dice) + ']'
+    await ctx.send(res)
 
-@bot.command(name='rool')
-async def rool(ctx):
-    pass
+@roll.error
+async def roll_err(ctx, error):
+    if isinstance(error, commands.errors.MissingRequiredArgument) or isinstance(error, commands.errors.BadArgument):
+        res = ("Hmm... I'm missing some information\n" 
+        + "Usage: `!roll <number_of_dice> <number_of_sides>`")
+        await ctx.send(res)
+    #TODO: Why doesn't this catch???
+    if isinstance(error, discord.errors.HTTPException):
+        await ctx.send("Why tho? Try using smaller numbers.")
+
 
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have the correct role for this command.')
-    if isinstance(error, commands.errors.CommandNotFound):
+    elif isinstance(error, commands.errors.CommandNotFound):
         incorrect_command = error.args[0].split()[1]
         all_commands = []
         for command in bot.commands:
             all_commands.append(command.name)
         helptext='`'+ incorrect_command + '` command not found. Closest matches: '
         helptext+= '`' + '`, `'.join(get_close_matches(incorrect_command, all_commands, cutoff=.3)) 
-        helptext+= '`' 
+        helptext+= '`'
         await ctx.send(helptext)
+    #TODO: Add a main function that takes a debug flag to activate this??
+    else:
+        await ctx.send(error.args[0])
 
 # @bot.command(name='create-channel')
 # @commands.has_role('admin')
@@ -107,7 +122,7 @@ bot.run(TOKEN)
 #         else:
 #             raise
 
-"""Creating a subclass of client and overriding handler methods"""
+######## Creating a subclass of client and overriding handler methods
 # class CustomClient(discord.Client):
 #     async def on_ready(self):
 #         print(f'{self.user} has connected to Discord!')
