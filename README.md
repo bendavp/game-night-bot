@@ -1,9 +1,15 @@
 # Game Night Bot
 ## A Discord bot, written in Python3 to help manage game nights.
+## PRs welcome!
+
+### About:
+TODO
 
 ### Completed features/commands:
 * Roll die: Rolls a specified number of die with a specified number of sides. 
     * Usage: `!roll <number of die> <number of sides>`
+    * Thanks to Alex Ronquillo from Real Python!
+        * https://realpython.com/how-to-make-a-discord-bot-python/! 
 
 ### Planned features/commands:
 * Keep track of a list of games, including:
