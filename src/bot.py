@@ -16,7 +16,7 @@ with open('../data/games_links.json') as f:
     GAMES_LINKS = json.load(f)
 
 with open('../data/games_help.json') as f:
-    GAMES_HELP = json.load(f)
+    GAMES_INFO = json.load(f)
 
 from pathlib import Path
 env_path = Path('.') / '../data/.env'
@@ -31,14 +31,28 @@ async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
 
 @bot.command(name='game', help="Gets a list of Games for Game Night")
-@commands.has_role('admin')
-async def game(ctx, game, info):
-    res = "test"
-    # if game == "help":
-    #     res += ("Usage: `!game <name_of_the_game> <info/link>`\n" + 
-    #     "For example, try: `!game cah info` or `!game keep_talking link`\n\n" +
-    #     "Available games:\n\t" + "\n\t{}".join(GAMES_NAMES.items()))    
-    await ctx.send(res)
+async def game(ctx, info, *game):
+    if info == "help":
+        res = ("Usage: `!game <name_of_the_game> <info/link>`\n" + 
+        "For example, try: `!game cah info` or `!game keep_talking link`\n" +
+        "```Available games:\n\t")
+        res+= "\n\t".join('{:<15}{:<30}'.format(key + ':', value) for key, value in GAMES_NAMES.items())
+        res+= "```"
+        await ctx.send(res)
+    elif info == "link":
+        game_name = ''.join(game)
+        #TODO: Allow variants of game
+        if game_name not in GAMES_NAMES.keys():
+            raise commands.errors.BadArgument()
+        else:
+            await ctx.send(GAMES_NAMES.get(game_name) + ": " + GAMES_LINKS.get(game_name))
+
+@game.error
+async def game_err(ctx, error):
+    if isinstance(error, commands.errors.MissingRequiredArgument) or isinstance(error, commands.errors.BadArgument):
+        res = ("Hmm... I'm missing some information\n" 
+        + "Usage: `!roll <number_of_dice> <number_of_sides>`")
+        await ctx.send(res)
 
 @bot.command(name='roll', help='Simulates rolling dice.')
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
@@ -55,10 +69,8 @@ async def roll_err(ctx, error):
         res = ("Hmm... I'm missing some information\n" 
         + "Usage: `!roll <number_of_dice> <number_of_sides>`")
         await ctx.send(res)
-    #TODO: Why doesn't this catch???
-    if isinstance(error, discord.errors.HTTPException):
+    if isinstance(error, commands.errors.CommandInvokeError):
         await ctx.send("Why tho? Try using smaller numbers.")
-
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -74,8 +86,9 @@ async def on_command_error(ctx, error):
         helptext+= '`'
         await ctx.send(helptext)
     #TODO: Add a main function that takes a debug flag to activate this??
-    else:
-        await ctx.send(error.args[0])
+    # else:
+    #     await ctx.send(type(error))
+    #     await ctx.send(error.args[0])
 
 # @bot.command(name='create-channel')
 # @commands.has_role('admin')
