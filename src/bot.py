@@ -1,5 +1,6 @@
 # bot.py
 
+from pathlib import Path
 import os
 import random
 import json
@@ -18,7 +19,6 @@ with open('../data/games_links.json') as f:
 with open('../data/games_help.json') as f:
     GAMES_INFO = json.load(f)
 
-from pathlib import Path
 env_path = Path('.') / '../data/.env'
 load_dotenv(dotenv_path=env_path)
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -26,33 +26,38 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 bot = commands.Bot(command_prefix='!')
 
+
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
 
+
 @bot.command(name='game', help="Gets a list of Games for Game Night")
 async def game(ctx, info, *game):
     if info == "help":
-        res = ("Usage: `!game <name_of_the_game> <info/link>`\n" + 
-        "For example, try: `!game cah info` or `!game keep_talking link`\n" +
-        "```Available games:\n\t")
-        res+= "\n\t".join('{:<15}{:<30}'.format(key + ':', value) for key, value in GAMES_NAMES.items())
-        res+= "```"
+        res = ("Usage: `!game <help/info/link> <name_of_game>`\n" +
+               "For example, try: `!game cah info` or `!game keep_talking link`\n" +
+               "```Available games:\n\t")
+        res += "\n\t".join('{:<15}{:<30}'.format(key + ':', value)
+                           for key, value in GAMES_NAMES.items())
+        res += "```"
         await ctx.send(res)
     elif info == "link":
         game_name = ''.join(game)
-        #TODO: Allow variants of game
+        # TODO: Allow variants of game
         if game_name not in GAMES_NAMES.keys():
             raise commands.errors.BadArgument()
         else:
             await ctx.send(GAMES_NAMES.get(game_name) + ": " + GAMES_LINKS.get(game_name))
 
+
 @game.error
 async def game_err(ctx, error):
     if isinstance(error, commands.errors.MissingRequiredArgument) or isinstance(error, commands.errors.BadArgument):
-        res = ("Hmm... I'm missing some information\n" 
-        + "Usage: `!roll <number_of_dice> <number_of_sides>`")
+        res = ("Hmm... I'm missing some information\n"
+               + "Usage: `!game <help/info/link> <name_of_game>`")
         await ctx.send(res)
+
 
 @bot.command(name='roll', help='Simulates rolling dice.')
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
@@ -60,17 +65,19 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
         str(random.choice(range(1, number_of_sides + 1)))
         for _ in range(number_of_dice)
     ]
-    res='[' + '] ['.join(dice) + ']'
+    res = '[' + '] ['.join(dice) + ']'
     await ctx.send(res)
+
 
 @roll.error
 async def roll_err(ctx, error):
     if isinstance(error, commands.errors.MissingRequiredArgument) or isinstance(error, commands.errors.BadArgument):
-        res = ("Hmm... I'm missing some information\n" 
-        + "Usage: `!roll <number_of_dice> <number_of_sides>`")
+        res = ("Hmm... I'm missing some information\n"
+               + "Usage: `!roll <number_of_dice> <number_of_sides>`")
         await ctx.send(res)
     if isinstance(error, commands.errors.CommandInvokeError):
         await ctx.send("Why tho? Try using smaller numbers.")
+
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -81,11 +88,13 @@ async def on_command_error(ctx, error):
         all_commands = []
         for command in bot.commands:
             all_commands.append(command.name)
-        helptext='`'+ incorrect_command + '` command not found. Closest matches: '
-        helptext+= '`' + '`, `'.join(get_close_matches(incorrect_command, all_commands, cutoff=.3)) 
-        helptext+= '`'
+        helptext = '`' + incorrect_command + '` command not found. Closest matches: '
+        helptext += '`' + \
+            '`, `'.join(get_close_matches(
+                incorrect_command, all_commands, cutoff=.3))
+        helptext += '`'
         await ctx.send(helptext)
-    #TODO: Add a main function that takes a debug flag to activate this??
+    # TODO: Add a main function that takes a debug flag to activate this??
     # else:
     #     await ctx.send(type(error))
     #     await ctx.send(error.args[0])
@@ -120,7 +129,7 @@ bot.run(TOKEN)
 # async def on_message(message):
 #     if message.author == client.user:
 #         return
-    
+
 #     if str(message.content).startswith('!'):
 #         response = "Responding!"
 #         await message.channel.send(response)
@@ -135,7 +144,7 @@ bot.run(TOKEN)
 #         else:
 #             raise
 
-######## Creating a subclass of client and overriding handler methods
+# Creating a subclass of client and overriding handler methods
 # class CustomClient(discord.Client):
 #     async def on_ready(self):
 #         print(f'{self.user} has connected to Discord!')
